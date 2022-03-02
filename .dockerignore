@@ -1,0 +1,8 @@
+.git
+.tox
+.venv
+.virtualenv_hooks
+db
+dist
+docs
+screenshots

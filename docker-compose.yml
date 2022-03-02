@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+
+  backend:
+    image: unicef/drips:dev
+    env_file: ./drips/.env
+
+    environment:
+      DATABASE_URL: postgres://postgres:pass@db:5432/drips
+      HOST: http://drips.localhost
+      DEBUG: 1
+      CACHE_URL: redis://redis:6379/1
+      REDIS_URL: redis://redis:6379/1
+      CELERY_BROKER_URL: redis://redis:6379/2
+      CELERY_RESULT_BACKEND: redis://redis:6379/3
+      CSRF_COOKIE_SECURE: 0
+      SECURE_SSL_REDIRECT: 0
+      SESSION_COOKIE_HTTPONLY: 0
+      SESSION_COOKIE_SECURE: 0
+      STATIC_ROOT: /var/drips/static/
+      MEDIA_ROOT: /var/drips/media/
+      MEDIA_URL: http://drips.localhost/media/
+      ALLOWED_HOST: drips.localhost
+
+    volumes:
+      - "./drips-backend:/code"
+      - "./volumes/backend/var/drips/:/var/drips"
+    depends_on:
+      - db
+      - redis
+    container_name: drips_backend
+    labels:
+      traefik.http.routers.backend.rule: Host(`drips.localhost`) && PathPrefix(`/drips/`, `/static/`)
+
+#  frontend:
+#    image: unicef/drips-frontend:develop
+#    container_name: drips_frontend
+#    labels:
+#      traefik.http.routers.frontend.rule: Host(`drips.localhost`)
+
+#  frontend:
+#    build:
+#      context: ./drips-frontend
+#      dockerfile: Dockerfile-dev
+#    image: unicef/drips-frontend:build
+#    container_name: drips_frontend_build
+#    volumes:
+#      - "./drips-frontend:/code"
+#    command: sh -c "npm run start"
+#    labels:
+#      traefik.http.routers.frontend.rule: Host(`drips.localhost`)
+#      traefik.http.services.fronted.loadBalancer.server.port: 3000
+
+  proxy:
+    image: traefik:v2.4
+    container_name: drips_proxy
+    command:
+      - --api.insecure=true
+      - --entrypoints.web.address=:80
+      - --providers.docker
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      traefik.http.routers.dash.rule: Host(`dash.localhost`)
+      traefik.http.routers.dash.service: api@internal
+
+  db:
+    image: postgres:12-alpine
+    container_name: drips_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: drips
+    volumes:
+      - "./volumes/db2/data:/var/lib/postgresql/data"
+
+  redis:
+    image: redis:6.2-alpine
+    container_name: drips_redis
+    hostname: redis
+    command: ["redis-server", "--appendonly", "yes"]

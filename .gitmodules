@@ -1,0 +1,3 @@
+[submodule "drips"]
+	path = drips
+	url = git@github.com:unicef/drips.git
