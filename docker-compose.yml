@@ -3,7 +3,7 @@ version: '3.8'
 services:
 
   backend:
-    image: unicef/drips:dev
+    image: unicef/drips:local
     env_file: ./drips/.env
 
     environment:
@@ -34,7 +34,7 @@ services:
       traefik.http.routers.backend.rule: Host(`drips.localhost`) && PathPrefix(`/drips/`, `/static/`)
 
 #  frontend:
-#    image: unicef/drips-frontend:develop
+#    image: unicef/drips-frontend:local
 #    container_name: drips_frontend
 #    labels:
 #      traefik.http.routers.frontend.rule: Host(`drips.localhost`)
