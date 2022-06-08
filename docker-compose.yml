@@ -33,15 +33,15 @@ services:
     labels:
       traefik.http.routers.backend.rule: Host(`drips.localhost`) && PathPrefix(`/drips/`, `/static/`)
 
-#  frontend:
-#    image: unicef/drips-frontend:local
-#    container_name: drips_frontend
-#    labels:
-#      traefik.http.routers.frontend.rule: Host(`drips.localhost`)
+  frontend:
+    image: unicef/drips-fe:local
+    container_name: drips_frontend
+    labels:
+      traefik.http.routers.frontend.rule: Host(`drips.localhost`)
 
 #  frontend:
 #    build:
-#      context: ./drips-frontend
+#      context: ./drips-fe
 #      dockerfile: Dockerfile-dev
 #    image: unicef/drips-frontend:build
 #    container_name: drips_frontend_build
